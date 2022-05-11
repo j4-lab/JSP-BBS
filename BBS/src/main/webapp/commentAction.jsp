@@ -1,3 +1,4 @@
+<%@page import="session.SessionDAO"%>
 <%@page import="comment.CommentDAO"%>
 <%@page import="comment.Comment"%>
 <%@page import="java.io.File"%>
@@ -31,8 +32,21 @@
 		}
 		
 		String memberID = null;
+		int session_index = 0;
+		
 		if(session.getAttribute("memberID")!=null){
 			memberID = (String) session.getAttribute("memberID");
+			session_index = (int)session.getAttribute("session_index");
+			
+			SessionDAO sessionDAO = new SessionDAO();
+			
+			if(sessionDAO.check(session_index).equals("B")){
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('중복로그인 되었습니다.')");
+				script.println("location.href = 'logoutAction.jsp'");
+				script.println("</script>");
+			}
 		}
 		
 		if(memberID==null){

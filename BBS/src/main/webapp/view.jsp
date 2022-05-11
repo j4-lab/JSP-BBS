@@ -1,3 +1,4 @@
+<%@page import="session.SessionDAO"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="comment.Comment"%>
 <%@page import="comment.CommentDAO"%>
@@ -16,10 +17,23 @@
 </head>
 <body>
 	<%
-		String memberID = null;
-		if(session.getAttribute("memberID")!=null){
-			memberID = (String) session.getAttribute("memberID");
+	String memberID = null;
+	int session_index = 0;
+	
+	if(session.getAttribute("memberID")!=null){
+		memberID = (String) session.getAttribute("memberID");
+		session_index = (int)session.getAttribute("session_index");
+		
+		SessionDAO sessionDAO = new SessionDAO();
+		
+		if(sessionDAO.check(session_index).equals("B")){
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('중복로그인 되었습니다.')");
+			script.println("location.href = 'logoutAction.jsp'");
+			script.println("</script>");
 		}
+	}
 		
 		int boardID=0;
 		if(request.getParameter("board_id")!=null){
@@ -106,6 +120,7 @@
 		</div>
 	</nav>
 	
+	<% if(!board.isSecret()){ %>
 	<div class="container">
 		<div class="row">
 			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd;">
@@ -165,7 +180,7 @@
 							for(int i=list.size()-1;i>=0;i--){
 						%>
 						<tr>
-							<td style="text-align: left;"><%= list.get(i).getContent() %></td>
+							<td style="text-align: left;"><%= list.get(i).getContent().replaceAll(" ", "&nbsp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("\n","<br>") %></td>
 							<td style="text-align: right;"><%= list.get(i).getWriter() %>
 							<%
 								if(memberID!=null && memberID.equals(list.get(i).getWriter())){
@@ -227,9 +242,12 @@
 			<%
 				}
 			%>
-			<input type="submit" class="btn btn-primary pull-right" value="글쓰기">
+			<a href="write.jsp" class="btn btn-primary pull-right">글쓰기</a>
 		</div>
 	</div>
+	
+	<%} %>
+	
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="js/bootstrap.js"></script>
 </body>

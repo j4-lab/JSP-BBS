@@ -1,3 +1,4 @@
+<%@page import="session.SessionDAO"%>
 <%@page import="board.BoardDAO"%>
 <%@page import="java.io.PrintWriter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -12,10 +13,23 @@
 </head>
 <body>
 	<%
-		String memberID = null;
-		if(session.getAttribute("memberID")!=null){
-			memberID = (String) session.getAttribute("memberID");
+	String memberID = null;
+	int session_index = 0;
+	
+	if(session.getAttribute("memberID")!=null){
+		memberID = (String) session.getAttribute("memberID");
+		session_index = (int)session.getAttribute("session_index");
+		
+		SessionDAO sessionDAO = new SessionDAO();
+		
+		if(sessionDAO.check(session_index).equals("B")){
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('중복로그인 되었습니다.')");
+			script.println("location.href = 'logoutAction.jsp'");
+			script.println("</script>");
 		}
+	}
 		
 		int boardID=0;
 		if(request.getParameter("board_id")!=null){

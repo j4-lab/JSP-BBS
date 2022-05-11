@@ -1,3 +1,4 @@
+<%@page import="session.SessionDAO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
 <!DOCTYPE html>
@@ -10,10 +11,23 @@
 </head>
 <body>
 	<%
-		String memberID = null;
-		if(session.getAttribute("memberID")!=null){
-			memberID = (String) session.getAttribute("memberID");
+	String memberID = null;
+	int session_index = 0;
+	
+	if(session.getAttribute("memberID")!=null){
+		memberID = (String) session.getAttribute("memberID");
+		session_index = (int)session.getAttribute("session_index");
+		
+		SessionDAO sessionDAO = new SessionDAO();
+		
+		if(sessionDAO.check(session_index).equals("B")){
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('중복로그인 되었습니다.')");
+			script.println("location.href = 'logoutAction.jsp'");
+			script.println("</script>");
 		}
+	}
 		
 		if(memberID==null){
 			PrintWriter script = response.getWriter();
@@ -90,7 +104,7 @@
 					</tr>
 					<tr>
 						<td><input type="checkbox" name="secret" value="true">비밀글</td>						
-						<td><input type="text" class="form-control" placeholder="4자리 숫자" name="secret_key" maxlenth="4"></td>
+						<td><input type="text" class="form-control" placeholder="4글자" name="secret_key" maxlength="4"></td>
 					</tr>
 					<tr>
 						<td colspan="2"><input type="file" class="form-control"  name="upload" ></td>

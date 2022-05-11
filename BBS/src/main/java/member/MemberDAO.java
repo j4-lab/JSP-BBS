@@ -23,6 +23,23 @@ public class MemberDAO {
 		}
 	}
 	
+	public int getFailCount(String id) {
+		String SQL = "select fail_count from member where id = ?";
+		try {
+			pstmt = conn.prepareStatement(SQL);
+			pstmt.setString(1,  id);
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				return rs.getInt("fail_count");
+			}
+			return -1; 
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return -2; 
+	}
+	
 	public int login(String id, String pw) {
 		String SQL = "select pw from member where id = ?";
 		try {
@@ -33,6 +50,15 @@ public class MemberDAO {
 				if(rs.getString(1).equals(pw)) {
 					return 1; // login
 				}else {
+					String SQL1 = "update member set fail_count = member.fail_count+1 where id = ?";
+					try {
+						pstmt = conn.prepareStatement(SQL1);
+						pstmt.setString(1, id);
+						pstmt.executeUpdate();
+					}catch (Exception e) {
+						// TODO: handle exception
+						e.printStackTrace();
+					}
 					return 0; // password incorrect
 				}
 			}

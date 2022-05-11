@@ -1,3 +1,4 @@
+<%@page import="session.SessionDAO"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="comment.Comment"%>
 <%@page import="comment.CommentDAO"%>
@@ -14,12 +15,26 @@
 <link rel="stylesheet" href="css/bootstrap.css">
 <title>JSP 게시판 웹 사이트</title>
 </head>
+<%! int result = 0; %>
 <body>
 	<%
-		String memberID = null;
-		if(session.getAttribute("memberID")!=null){
-			memberID = (String) session.getAttribute("memberID");
+	String memberID = null;
+	int session_index = 0;
+	
+	if(session.getAttribute("memberID")!=null){
+		memberID = (String) session.getAttribute("memberID");
+		session_index = (int)session.getAttribute("session_index");
+		
+		SessionDAO sessionDAO = new SessionDAO();
+		
+		if(sessionDAO.check(session_index).equals("B")){
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('중복로그인 되었습니다.')");
+			script.println("location.href = 'logoutAction.jsp'");
+			script.println("</script>");
 		}
+	}
 		
 		int boardID=0;
 		if(request.getParameter("board_id")!=null){
@@ -49,7 +64,7 @@
 		
 		BoardDAO boardDAO = new BoardDAO();
 		
-		int result = boardDAO.check(boardID, request.getParameter("secret_key"));
+		result = boardDAO.check(boardID, request.getParameter("secret_key"));
 		
 
 		if(result!=1){
@@ -113,6 +128,7 @@
 		</div>
 	</nav>
 	
+	<% if(result==1){ %>
 	<div class="container">
 		<div class="row">
 			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd;">
@@ -172,7 +188,7 @@
 							for(int i=list.size()-1;i>=0;i--){
 						%>
 						<tr>
-							<td style="text-align: left;"><%= list.get(i).getContent() %></td>
+							<td style="text-align: left;"><%= list.get(i).getContent().replaceAll(" ", "&nbsp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("\n","<br>") %></td>
 							<td style="text-align: right;"><%= list.get(i).getWriter() %>
 							<%
 								if(memberID!=null && memberID.equals(list.get(i).getWriter())){
@@ -210,11 +226,22 @@
 						}
 						%>
 			</form>
+		
 			<br>
-			
-			<input type="submit" class="btn btn-primary pull-right" value="글쓰기">
+			<a href="board.jsp" class="btn btn-primary">목록</a>
+			<%
+				if(memberID==null){}
+				else if(memberID!=null & memberID.equals(board.getWriter())){
+			%>
+					<a href="update.jsp?board_id=<%=boardID%>" class="btn btn-primary">수정</a>
+					<a onclick="return confirm('정말로 삭제하시겠습니까?')" href="deleteAction.jsp?board_id=<%=boardID%>&is_secret=" class="btn btn-primary">삭제</a>
+			<%
+				}
+			%>
+			<a href="write.jsp" class="btn btn-primary pull-right">글쓰기</a>
 		</div>
 	</div>
+	<%} %>
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="js/bootstrap.js"></script>
 </body>

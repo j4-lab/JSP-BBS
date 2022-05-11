@@ -1,3 +1,4 @@
+<%@page import="session.SessionDAO"%>
 <%@page import="member.MemberDAO"%>
 <%@page import="java.util.regex.Pattern"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -18,12 +19,27 @@
 </head>
 <body>
 	<%
-		String memberID = null;
-		if(session.getAttribute("memberID")!=null){
-			memberID = (String) session.getAttribute("memberID");		
-		}
+	String memberID = null;
+	int session_index = 0;
+	int session_result = 0;
+	
+	if(session.getAttribute("memberID")!=null){
+		memberID = (String) session.getAttribute("memberID");
+		session_index = (int)session.getAttribute("session_index");
 		
-		if(memberID==null){
+		SessionDAO sessionDAO = new SessionDAO();
+		
+		if(sessionDAO.check(session_index).equals("B")){
+			session_result = -1;
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('중복로그인 되었습니다.')");
+			script.println("location.href = 'logoutAction.jsp'");
+			script.println("</script>");
+		}
+	}
+		
+		if(session_result == -1 || memberID==null){
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('로그인 해주세요.')");
